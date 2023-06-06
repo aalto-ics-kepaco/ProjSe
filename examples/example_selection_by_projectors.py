@@ -36,9 +36,12 @@ def norm_data(X):
 def kern_func_gaussian(X1,X2, **kernel_params):
   """
   Task:  to compute the Guassian kernel between the rows of the input arrays 
-  Input:  X1     2d array 
-          X2     2d array
-          sigma  the standard deviation of the Gaussian
+  Input:  X1               2d array 
+          X2               2d array
+          kernel_params    dictionary, e.g. { 'sigma' : 1 }
+                           the standard deviation of the Gaussian
+                           if it is None or 'sigma' is not in kernel_params
+                           then sigma = np.sqrt(X1.shape[1]) is the default
   Output: KX12   Gaussian kernel        
   """
 
@@ -117,7 +120,7 @@ def main(workmode):
 
   print(lorder)
 
-  ## selected variables
+  ## test the selected variables
   xstat_projection = np.zeros(nitem)
   xstat_random = np.zeros(nitem)
   for i in range(nitem):
@@ -133,7 +136,7 @@ def main(workmode):
     xstat_projection[i] = ycorr
 
     
-  ## random selection
+  ## random selection for comparison
   xrandom = np.arange(nitem)
   rng.shuffle(xrandom)
   for i in range(nitem):

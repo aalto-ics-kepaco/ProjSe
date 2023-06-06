@@ -2,10 +2,9 @@
 
 ## Requirements
 
-The application of the VaSP assumes the  **Python** interpreter, version at least **3.7**, and the **Numpy** package, version at least **1.20**. 
+The application of the ProjSe assumes the  **Python** interpreter, version at least **3.7**, and the **numpy** package, version at least **1.20**. 
 
-To run the examples also
-requires the **matplotlib**. All these packages
+To run the examples also requires the **matplotlib**. All these packages
 can be freely downloaded and installed from *pypi.org*. 
 
 ## Installation
@@ -37,12 +36,11 @@ Before installing the  ProjSe package the latest version of the Python packages 
 
 The ProjSe can be imported as
 
->import  as ProjSe
+>import  ProjSe
 
 ## Running the projective selection algorithm
 
-There is a demonstration in the "examples" directory. It requires the instalation of the matplotlib.
-
+There is a demonstration in the "examples" directory. It requires the installation of the matplotlib.
 
 ## Interface:
 
@@ -68,7 +66,7 @@ If func_kern == None then the linear kernel is used.
 
 >  kernel_params 
 
->  dictionary of parameters transfered to the function given in the func_kern.
+>  dictionary of parameters transferred to the function given in the func_kern.
 
 >     """
 
@@ -80,8 +78,8 @@ Running the variable selection:
 
 >    """
 
->    Task: to enumerate the x variables best correalting with Y
->          but conditionaly uncorrelating with the previous selection
+>    Task: to enumerate the x variables best correlating with Y
+>          but conditionally uncorrelating with the previous selection
 
 >    Input:  
 
@@ -91,11 +89,11 @@ Running the variable selection:
 
 >            nitem   maximum number of x variables selected
 
->            ilocal  =1 X,Y cenralized =0 not
+>            ilocal  =1 X,Y centralized =0 not
 
 >            iscale  =1 X,Y normalized row wise to have length 1 = 0 not
 
->    Output  lorder  list of x variables aranged by selection order
+>    Output  lorder  list of x variables arranged by selection order
 
 >    """
 

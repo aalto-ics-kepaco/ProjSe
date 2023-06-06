@@ -53,21 +53,30 @@ class cls_projector_kern:
   ## --------------------------  
   def __init__(self, func_kernel = None, **kernel_params):
     """
-    Input:  func_kern    reference to kernel function, 
-                         it assumes two 2d array X1,X2 inputs, a 2d array of kernel matrix
-                         The inner product are computed between the rows of X1 and X2.
-                         The number of rows in X1 and X2 can be different.
-                         See the default example: self.lin_kern in this class 
-                         If func_kern == None then linear kernel is used.
+    Input:
+      func_kern      reference to kernel function, it assumes two 2d array
+                     X1,X2 as inputs, and a 2d array of kernel matrix is
+                     the output. The inner product are computed between the rows
+                     of X1 and X2.
+                     The number of rows in X1 and X2 can be different.
+                     See the default example: 
+                         kern_func_gaussian  in this module 
+                     If func_kern == None then linear kernel is used.
+
+      kernel_params  dictionary of the kernel parameters
+                     it is transfered to the kernel function
+                     refered in the func_kern.
+                     See also the kern_func_gaussian example
      """
 
     self.Y=None         ## reference frame
     self.X=None         ## target frame
     self.xmask=None     ## indicator of selected x vectors up to t
 
-    self.Ky=None        ## kernel of references
-    self.Kyx = None     ## output-input kernel
-    self.Kx = None      ## input kernel, only computed if centralization is required
+    self.Ky=None        ## kernel of outputs
+    self.Kyx = None     ## output-input cross-kernel
+    self.Kx = None      ## input kernel, only computed
+                        ## if centralization is required
     self.DVT = None     ## the transpose of generalized inverse 
                         ## of the square root of Ky kernel
 
@@ -78,7 +87,7 @@ class cls_projector_kern:
 
     self.t = 0          ## iteration counter
     self.xmask = None   ## indicators of the selected variables         
-    self.xstat = None  ## the scores of the selected variables
+    self.xstat = None   ## the scores of the selected variables
 
     self.kernel_params = kernel_params
     
@@ -89,9 +98,12 @@ class cls_projector_kern:
     """
     Task: to compute default linear kernel between rows, 
           for variables the inputs need to be transposed
-    Input:  X1   2d array of left data
-            X2   2d array of right data 
-    Output: KX   2d array of kernel
+    Input:
+      X1              2d array of left data
+      X2              2d array of right data
+      kernel_params   dictionary containing the potential
+                      kernel parameters 
+    Output: KX        2d array of linear kernel
     """
 
     tshape1 = X1.shape
@@ -160,7 +172,8 @@ class cls_projector_kern:
 
     ## computer kernels between variables
     self.Ky=func_kern(Y.T,Y.T, **self.kernel_params)    ## output kernel
-    self.Kyx=func_kern(Y.T,X.T, **self.kernel_params)   ## kernel between output and input 
+    ## cross-kernel between output and input
+    self.Kyx=func_kern(Y.T,X.T, **self.kernel_params)    
     if ilocal == 1:                  ## centralization
       self.Ky=self.centr_kern(self.Ky)
       self.Kyx=self.centr_kern(self.Kyx)
@@ -182,7 +195,8 @@ class cls_projector_kern:
         kxnorms += (kxnorms == 0)
         self.Kyx /= np.outer(kynorms,kxnorms)
 
-    ## compute the right singular vectors and the singular values of the output data
+    ## compute the right singular vectors and
+    ##  the singular values of the output data
     d_Y,V_Y = np.linalg.eigh(self.Ky)  
     ## to avoid division by 0
     eps = 10**(-6)   ## lower bound on eigen values
@@ -243,9 +257,12 @@ class cls_projector_kern:
       ## print(t)
       ix = np.where(self.xmask==0)[0]       ## remaining input variables
       if t > 1:
-        ## compute \tilde{U}_t^{T}\phi(X)^{T}  =  Q_t\tilde{U}_{t-1}^{T}\phi(X)^{T}
+        ## compute \tilde{U}_t^{T}\phi(X)^{T}
+        ##   =  Q_t\tilde{U}_{t-1}^{T}\phi(X)^{T}
         ## Q_t = I - (q_t q_t^{T})||q_t||^2
-        UtX = UtX - np.outer(qt,np.dot(qt,UtX))   ## projection into the complement
+        
+        ## projection into the complement
+        UtX = UtX - np.outer(qt,np.dot(qt,UtX))   
       ## print(np.max(np.abs(UtX)))
       n2UtX = np.sum(UtX**2,0)                  ## square norms
       ## print('max norm:',np.max(n2UtX))
@@ -273,7 +290,6 @@ def centr_data(X):
   """
   Task: data centralization by column mean
   """
-  
   xmean = np.mean(X,0)
   X -= np.outer(np.ones(X.shape[0]),xmean)
 
@@ -283,7 +299,6 @@ def norm_data(X):
   """
   Task: data normalization by L_2 norm row wise
   """
-  
   xnorm = np.sqrt(np.sum(X**2,1))
   xnorm += 1*(xnorm==0)
   X /= np.outer(xnorm,np.ones(X.shape[1]))
@@ -295,7 +310,10 @@ def kern_func_gaussian(X1,X2, **kernel_params):
   Task:  to compute the Guassian kernel between the rows of the input arrays 
   Input:  X1     2d array 
           X2     2d array
-          sigma  the standard deviation of the Gaussian
+          kernel_params    dictionary, e.g. { 'sigma' : 1 }
+                           the standard deviation of the Gaussian
+                           if it is None or 'sigma' is not in kernel_params
+                           then sigma = np.sqrt(X1.shape[1]) is the default
   Output: KX12   Gaussian kernel        
   """
 
@@ -346,7 +364,8 @@ def main(workmode):
   ny = 10                   ## output dimension
   rng = np.random.default_rng()
 
-  X=rng.standard_normal(size=(m,n))  ## the variables to be selected in the columns
+  ## the variables to be selected in the columns
+  X=rng.standard_normal(size=(m,n))  
   X=centr_data(X)                      
   X=norm_data(X)
   W=rng.standard_normal(size=(n,ny))  ## linear mapping
