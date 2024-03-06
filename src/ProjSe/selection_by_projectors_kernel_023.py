@@ -1,7 +1,7 @@
 ######################
-## Version 0.22 #######
+## Version 0.23 #######
 ## /**********************************************************************
-##   Copyright 2023, Sandor Szedmak  
+##   Copyright 2024, Sandor Szedmak  
 ##   email: sandor.szedmak@uibk.ac.at
 ##          szedmak777@gmail.com
 ##
@@ -9,7 +9,7 @@
 ##    operators(VASP).
 ##
 ##     MIT License
-##     Copyright (c) 2023 KEPACO
+##     Copyright (c) 2024 KEPACO
 ##
 ##     Permission is hereby granted, free of charge, to any person obtaining
 ##     a copy of this software and associated documentation files (the
@@ -217,7 +217,7 @@ class cls_projector_kern:
     return
 
   ## -----------------------------------
-  def full_cycle(self,Y,X,nitem,ilocal = 1, iscale = 1):
+  def full_cycle(self,Y,X,nitem,ilocal = 0, iscale = 1):
     """
     Task: to enumerate the x variables best correalting with Y
           but conditionaly uncorrelating with the previous selection
@@ -233,10 +233,7 @@ class cls_projector_kern:
     m,nx=X.shape
     ny=Y.shape[1]
 
-    if nitem>=nx:
-      nitem0=nx
-    else:
-      nitem0=nitem
+    nitemmax = min([nx,ny,nitem])
 
     ## U = D_{Y}^{-1}V_{Y}^{T}\phi(Y)^{T}  
     ## P_{t}X^{T} = \tilde{U}\tilde{U}^{T}\phi(X)  
@@ -251,9 +248,9 @@ class cls_projector_kern:
     UtX = np.dot(self.DVT,self.Kyx)  ## half projections
     ## print('UtX.shape:',UtX.shape)
 
-    self.xstat=np.zeros(nitem)   ## the score of the selected variables
+    self.xstat=np.zeros(nitemmax)   ## the score of the selected variables
 
-    for t in range(nitem):
+    for t in range(nitemmax):
       ## print(t)
       ix = np.where(self.xmask==0)[0]       ## remaining input variables
       if t > 1:
@@ -376,7 +373,7 @@ def main(workmode):
   ## @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
   ## the input variable selection procedure
   nitem=20                  ## number of variables to be selected
-  kernel_params = { }     ## e.g.: '{'sigma': 1} 
+  kernel_params = {}    ## e.g.: '{'sigma': 1} 
   kernel_func = kern_func_gaussian
   ## construct the object
   cproject=cls_projector_kern(func_kernel = kernel_func, **kernel_params) 
