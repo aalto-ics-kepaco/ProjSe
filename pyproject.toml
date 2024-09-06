@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ProjSe"
-version = "0.23"
+version = "0.24"
 author = [{name = "Sandor Szedmak", email = "sandor.szedmak@aalto.fi"}]
 description = "Supervised variables selection by projection operators in kernel space"
 readme = "README.md"

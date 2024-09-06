@@ -1,5 +1,5 @@
 ######################
-## Version 0.23 #######
+## Version 0.24 #######
 ## /**********************************************************************
 ##   Copyright 2024, Sandor Szedmak  
 ##   email: sandor.szedmak@uibk.ac.at
@@ -67,6 +67,13 @@ class cls_projector_kern:
                      it is transfered to the kernel function
                      refered in the func_kern.
                      See also the kern_func_gaussian example
+                     Additional parameters:
+                     input and output are set when the kernel function
+                     is called to compute the
+                     input-input kernel:  input = True,  output = False
+                     output-input kernel: input = True,  output = Ture
+                     output-output kernel input = False, output = True
+                     
      """
 
     self.Y=None         ## reference frame
@@ -128,9 +135,11 @@ class cls_projector_kern:
 
     m,n = X.shape
     kxnorms=np.zeros(m)
+    self.kernel_params['input'] = True
+    self.kernel_params['output'] = False
     for i in range(m):
-      kxnorms[i]=np.sqrt(self.func_kern(X[i:i+1],X[i:i+1], \
-                         **self.kernel_params))
+      f = self.func_kern(X[i:i+1],X[i:i+1], **self.kernel_params)
+      kxnorms[i]=np.sqrt(f)[0,0]  ## (1,1) array to scalar 
       if kxnorms[i]==0:
         kxnorms[i]=1
 
@@ -171,12 +180,18 @@ class cls_projector_kern:
     func_kern = self.func_kern
 
     ## computer kernels between variables
+    self.kernel_params['input'] = False
+    self.kernel_params['output'] = True
     self.Ky=func_kern(Y.T,Y.T, **self.kernel_params)    ## output kernel
     ## cross-kernel between output and input
+    self.kernel_params['input'] = True
+    self.kernel_params['output'] = True
     self.Kyx=func_kern(Y.T,X.T, **self.kernel_params)    
     if ilocal == 1:                  ## centralization
       self.Ky=self.centr_kern(self.Ky)
       self.Kyx=self.centr_kern(self.Kyx)
+      self.kernel_params['input'] = True
+      self.kernel_params['output'] = False
       self.Kx=func_kern(X.T,X.T, **self.kernel_params)
       self.Kx=self.centr_kern(self.Kx)
       if iscale == 1:    ## normalization by L2 norm in the feature space
@@ -378,13 +393,21 @@ def main(workmode):
   ## construct the object
   cproject=cls_projector_kern(func_kernel = kernel_func, **kernel_params) 
   lorder=cproject.full_cycle(Y,X,nitem)  ## run the selection
+  ## print the correlation to each selected variable
+  print('Correlation value to each selected variable')
+  for i in range(len(lorder)):
+    print('Variable index:','%4d'%lorder[i],',', \
+          'Correaltion value:', '%7.4f'%cproject.xstat[i])
+  print()  
   ## @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-  print(lorder)
+  ## print(lorder)
 
   ## selected variables
   xstat_projection = np.zeros(nitem)
   xstat_random = np.zeros(nitem)
+  print('Accuracy of linear regression with respect to '+'\n'+ \
+        'the number of projection based variable selection')
   for i in range(nitem):
     Xl = X[:,lorder[0:i+1]]
     ## recompute the output prediction on the selected variables
@@ -394,13 +417,16 @@ def main(workmode):
     Yl = np.dot(Xl,Wl)
     ## accuracy measured by P-correlation
     ycorr = np.corrcoef(Y.ravel(),Yl.ravel())[0,1]
-    print(ycorr)
+    print('Number of variables:','%5d'%i,'Pearson correaltion:','%7.4f'%ycorr)
     xstat_projection[i] = ycorr
+  print()  
 
     
   ## random selection
   xrandom = np.arange(nitem)
   rng.shuffle(xrandom)
+  print('Accuracy of linear regression with respect to '+'\n'+ \
+        'the number of randomly selected variables')
   for i in range(nitem):
     Xl = X[:,xrandom[0:i+1]]
     ## recompute the output prediction on the selected variables
@@ -410,14 +436,17 @@ def main(workmode):
     Yl = np.dot(Xl,Wl)
     ## accuracy measured by P-correlation
     ycorr = np.corrcoef(Y.ravel(),Yl.ravel())[0,1]
-    print(ycorr)
+    print('Number of variables:','%5d'%i,'Pearson correaltion:','%7.4f'%ycorr)
     xstat_random[i] = ycorr
+  print()  
 
   ## projective prediction is red, random is blue
   ## plt.plot(xstat_random,'b',xstat_projection,'r')
   ## plt.show()
 
   print('Bye')
+  print()  
+
   
   return
   
