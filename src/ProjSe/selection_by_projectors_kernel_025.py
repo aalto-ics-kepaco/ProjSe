@@ -1,7 +1,7 @@
 ######################
-## Version 0.24 #######
+## Version 0.25 #######
 ## /**********************************************************************
-##   Copyright 2024, Sandor Szedmak  
+##   Copyright 2024,2025, Sandor Szedmak  
 ##   email: sandor.szedmak@uibk.ac.at
 ##          szedmak777@gmail.com
 ##
@@ -9,7 +9,7 @@
 ##    operators(VASP).
 ##
 ##     MIT License
-##     Copyright (c) 2024 KEPACO
+##     Copyright (c) 2024,2025 KEPACO
 ##
 ##     Permission is hereby granted, free of charge, to any person obtaining
 ##     a copy of this software and associated documentation files (the
@@ -41,7 +41,7 @@ import numpy as np
 ## #################################
 class cls_projector_kern:
   """
-  $\phi: \amthcal{X}\rightarrow \H_{\phi}$ feature mapping
+  $\phi: \mathcal{X}\rightarrow \H_{\phi}$ feature mapping
   if $\phi(X)$ is the row wise feature representation of a set of vectors
   $x_1,\dots,x_k$ spanning subsapce $L_X$ then
   the projector into $L_X$ is given by
@@ -54,7 +54,7 @@ class cls_projector_kern:
   def __init__(self, func_kernel = None, **kernel_params):
     """
     Input:
-      func_kern      reference to kernel function, it assumes two 2d array
+      func_kern      reference to kernel function, it assumes two 2d arrays
                      X1,X2 as inputs, and a 2d array of kernel matrix is
                      the output. The inner product are computed between the rows
                      of X1 and X2.

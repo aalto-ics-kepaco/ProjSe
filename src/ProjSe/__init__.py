@@ -1,3 +1,3 @@
-from .selection_by_projectors_kernel_024 import *
+from .selection_by_projectors_kernel_025 import *
  
-__version__ = '0.24'
+__version__ = '0.25'
